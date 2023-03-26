@@ -35,9 +35,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
     CreateWindowW(
         L"myWindowClass", L"Sensitive Info Cleaner",
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-        100, 100, 500, 400,
-        nullptr, nullptr, nullptr, nullptr);
+                  WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 1800, 1000,
+                  nullptr, nullptr, nullptr, nullptr);
 
     MSG msg = { 0 };
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -54,20 +53,30 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         CreateWindowW(
             L"button", L"Cleanup",
             WS_VISIBLE | WS_CHILD,
-            200, 300, 100, 25,
+            500, 500, 100, 25,
             hWnd, (HMENU)ID_CLEANUP_BTN, nullptr, nullptr);
 
-        inputBox = CreateWindowW(
-            L"edit", L"",
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | WS_VSCROLL,
-            50, 50, 400, 100,
-            hWnd, (HMENU)ID_INPUT_BOX, nullptr, nullptr);
+        inputBox = CreateWindowW(L"edit", L"",
+                                 WS_VISIBLE | WS_CHILD | WS_BORDER |
+                                     ES_MULTILINE | WS_VSCROLL,
+                                 50, 50, 800, 400,
+                                 hWnd, (HMENU)ID_INPUT_BOX, nullptr, nullptr);
 
-        outputBox = CreateWindowW(
-            L"edit", L"",
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | WS_VSCROLL | ES_READONLY,
-            50, 170, 400, 100,
-            hWnd, (HMENU)ID_OUTPUT_BOX, nullptr, nullptr);
+        outputBox = CreateWindowW(L"edit", L"",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER |
+                                      ES_MULTILINE | WS_VSCROLL | ES_READONLY,
+                                  900, 50, 800,
+                                  400,
+                                  hWnd, (HMENU)ID_OUTPUT_BOX, nullptr, nullptr);
+
+        HFONT hFont = CreateFont(12, 0, 0, 0, FW_NORMAL, 0, 0, 0,
+                                 DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+                                 CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+                                 DEFAULT_PITCH | FF_SWISS, L"SimSun");
+
+        SendMessage(inputBox, WM_SETFONT, (WPARAM)hFont, TRUE);
+        SendMessage(outputBox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
     } break;
 
     case WM_COMMAND: {
