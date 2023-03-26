@@ -62,6 +62,16 @@ LRESULT CALLBACK EditBoxSubclassProc(HWND hWnd, UINT msg, WPARAM wParam,
         SendMessage(hWnd, EM_SETSEL, 0, -1);
         return 0;
     }
+    
+    if (msg == WM_LBUTTONDBLCLK) {
+        if (hWnd == outputBox) {
+            int length = GetWindowTextLengthW(outputBox);
+            if (length == 0) {
+                RunSensitiveInfoCleaner();
+            }
+        }
+    }
+
     if (hWnd == inputBox)
         return CallWindowProc(pfnOrigInputBoxProc, hWnd, msg, wParam, lParam);
     else
