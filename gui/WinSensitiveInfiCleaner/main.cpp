@@ -40,8 +40,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args,
         return -1;
 
     CreateWindowW(L"myWindowClass", L"Sensitive Info Cleaner",
-                  WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 1800, 1000,
-                  nullptr, nullptr, nullptr, nullptr);
+                  WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 800, 600, nullptr,
+                  nullptr, nullptr, nullptr);
 
     MSG msg = {0};
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -117,6 +117,32 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     }
 
     break;
+
+    case WM_SIZE: {
+        int nWidth = LOWORD(lp);
+        int nHeight = HIWORD(lp);
+
+        int nInputBoxWidth = static_cast<int>(nWidth * 0.40);
+        int nOutputBoxWidth = static_cast<int>(nWidth * 0.40);
+        int nMiddleWidth = nWidth - nInputBoxWidth - nOutputBoxWidth;
+
+        int nButtonHeight = 25;
+        int nTopButtonY = (nHeight - 2 * nButtonHeight) / 2;
+
+        // Move and resize inputBox and outputBox
+        MoveWindow(inputBox, 0, 0, nInputBoxWidth, nHeight, TRUE);
+        MoveWindow(outputBox, nInputBoxWidth + nMiddleWidth, 0, nOutputBoxWidth,
+                   nHeight, TRUE);
+
+        // Move and resize buttons
+        MoveWindow(GetDlgItem(hWnd, ID_CLEANUP_BTN),
+                   nInputBoxWidth + nMiddleWidth / 2 - 50, nTopButtonY, 100,
+                   nButtonHeight, TRUE);
+        MoveWindow(GetDlgItem(hWnd, ID_OPEN_EXE_FOLDER_BTN),
+                   nInputBoxWidth + nMiddleWidth / 2 - 50,
+                   nTopButtonY + nButtonHeight, 100, nButtonHeight, TRUE);
+
+    } break;
 
     case WM_DESTROY: {
         PostQuitMessage(0);
