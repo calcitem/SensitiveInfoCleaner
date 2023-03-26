@@ -66,7 +66,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
         outputBox = CreateWindowW(L"edit", L"",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER |
-                                      ES_MULTILINE | WS_VSCROLL | ES_READONLY,
+                                      ES_MULTILINE | WS_VSCROLL,
                                   900, 50, 800, 400, hWnd, (HMENU)ID_OUTPUT_BOX,
                                   nullptr, nullptr);
 
