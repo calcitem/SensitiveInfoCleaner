@@ -22,6 +22,9 @@ void RunSensitiveInfoCleaner();
 
 HWND inputBox, outputBox;
 
+WNDPROC pfnOrigInputBoxProc;
+WNDPROC pfnOrigOutputBoxProc;
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args,
                    int ncmdshow)
 {
@@ -46,6 +49,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args,
         DispatchMessage(&msg);
     }
     return 0;
+}
+
+LRESULT CALLBACK EditBoxSubclassProc(HWND hWnd, UINT msg, WPARAM wParam,
+                                     LPARAM lParam)
+{
+    if (msg == WM_KEYDOWN && wParam == 'A' &&
+        (GetKeyState(VK_CONTROL) & 0x8000)) {
+        SendMessage(hWnd, EM_SETSEL, 0, -1);
+        return 0;
+    }
+    if (hWnd == inputBox)
+        return CallWindowProc(pfnOrigInputBoxProc, hWnd, msg, wParam, lParam);
+    else
+        return CallWindowProc(pfnOrigOutputBoxProc, hWnd, msg, wParam, lParam);
 }
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -78,6 +95,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         SendMessage(inputBox, WM_SETFONT, (WPARAM)hFont, TRUE);
         SendMessage(outputBox, WM_SETFONT, (WPARAM)hFont, TRUE);
 
+        pfnOrigInputBoxProc = (WNDPROC)SetWindowLongPtr(
+            inputBox, GWLP_WNDPROC, (LONG_PTR)EditBoxSubclassProc);
+        pfnOrigOutputBoxProc = (WNDPROC)SetWindowLongPtr(
+            outputBox, GWLP_WNDPROC, (LONG_PTR)EditBoxSubclassProc);
     } break;
 
     case WM_COMMAND: {
