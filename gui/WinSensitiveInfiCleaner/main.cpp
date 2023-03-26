@@ -10,17 +10,20 @@
 #include <shellapi.h>
 #include <string>
 #include <thread>
+#include <commctrl.h> 
 #include <windows.h>
 
 #define ID_CLEANUP_BTN 1
 #define ID_INPUT_BOX 2
 #define ID_OUTPUT_BOX 3
 #define ID_BROWSE_BTN 4
+#define ID_TOOLBAR 5
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void RunSensitiveInfoCleaner();
 
 HWND inputBox, outputBox;
+HWND hToolbar;
 
 WNDPROC pfnOrigInputBoxProc;
 WNDPROC pfnOrigOutputBoxProc;
@@ -69,23 +72,58 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch (msg) {
     case WM_CREATE: {
-        CreateWindowW(L"button", L"Cleanup", WS_VISIBLE | WS_CHILD, 500, 500,
-                      100, 25, hWnd, (HMENU)ID_CLEANUP_BTN, nullptr, nullptr);
+        // Create the toolbar window
+        HWND hToolBar = CreateWindowEx(
+            0, TOOLBARCLASSNAME, NULL,
+            WS_CHILD | WS_VISIBLE | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT |
+                TBSTYLE_LIST,
+            0, 0, 0, 0, hWnd, (HMENU)ID_TOOLBAR, nullptr, nullptr);
 
-        CreateWindowW(L"button", L"Browse...", WS_VISIBLE | WS_CHILD, 700, 500,
-                      100, 25, hWnd, (HMENU)ID_BROWSE_BTN, nullptr,
-                      nullptr);
+        // Send the TB_BUTTONSTRUCTSIZE message, which is required for backward
+        // compatibility.
+        SendMessage(hToolBar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 
-        inputBox = CreateWindowW(
-            L"edit", L"",
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | WS_VSCROLL, 50,
-            50, 800, 400, hWnd, (HMENU)ID_INPUT_BOX, nullptr, nullptr);
+        // Create buttons for the toolbar
+        TBBUTTON tbButtons[2] = {{0,
+                                  ID_CLEANUP_BTN,
+                                  TBSTATE_ENABLED,
+                                  BTNS_AUTOSIZE,
+                                  {0},
+                                  0,
+                                  (INT_PTR)L"Cleanup"},
+                                 {1,
+                                  ID_BROWSE_BTN,
+                                  TBSTATE_ENABLED,
+                                  BTNS_AUTOSIZE,
+                                  {0},
+                                  0,
+                                  (INT_PTR)L"Browse..."}};
+
+        // Add buttons to the toolbar
+        SendMessage(hToolBar, TB_ADDBUTTONS,
+                    sizeof(tbButtons) / sizeof(TBBUTTON), (LPARAM)&tbButtons);
+
+        // Add a separator after the last button
+        TBBUTTON sep = {0, 0, TBSTATE_ENABLED, BTNS_SEP, {0}, 0, 0};
+        SendMessage(hToolBar, TB_ADDBUTTONS, 1, (LPARAM)&sep);
+
+        int toolbarHeight = 0;
+        RECT toolbarRect;
+        if (GetWindowRect(hToolbar, &toolbarRect)) {
+            toolbarHeight = toolbarRect.bottom - toolbarRect.top;
+        }
+
+        inputBox = CreateWindowW(L"edit", L"",
+                                 WS_VISIBLE | WS_CHILD | WS_BORDER |
+                                     ES_MULTILINE | WS_VSCROLL,
+                                 0, toolbarHeight, 800, 400, hWnd,
+                                 (HMENU)ID_INPUT_BOX, nullptr, nullptr);
 
         outputBox = CreateWindowW(L"edit", L"",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER |
                                       ES_MULTILINE | WS_VSCROLL,
-                                  900, 50, 800, 400, hWnd, (HMENU)ID_OUTPUT_BOX,
-                                  nullptr, nullptr);
+                                  900, toolbarHeight, 800, 400, hWnd,
+                                  (HMENU)ID_OUTPUT_BOX, nullptr, nullptr);
 
         HFONT hFont = CreateFont(12, 0, 0, 0, FW_NORMAL, 0, 0, 0,
                                  DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
@@ -122,26 +160,29 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         int nWidth = LOWORD(lp);
         int nHeight = HIWORD(lp);
 
-        int nInputBoxWidth = static_cast<int>(nWidth * 0.40);
-        int nOutputBoxWidth = static_cast<int>(nWidth * 0.40);
+        int nInputBoxWidth = static_cast<int>(nWidth * 0.5);
+        int nOutputBoxWidth = static_cast<int>(nWidth * 0.5);
         int nMiddleWidth = nWidth - nInputBoxWidth - nOutputBoxWidth;
 
         int nButtonHeight = 25;
         int nTopButtonY = (nHeight - 2 * nButtonHeight) / 2;
 
+        int toolbarHeight = 0;
+        RECT toolbarRect;
+        if (GetWindowRect(hToolbar, &toolbarRect)) {
+            toolbarHeight = toolbarRect.bottom - toolbarRect.top;
+        }
+
+        HWND hToolBar = GetDlgItem(hWnd, ID_TOOLBAR);
+        RECT rcToolBar;
+        GetWindowRect(hToolBar, &rcToolBar);
+        int nToolBarHeight = rcToolBar.bottom - rcToolBar.top;
+
         // Move and resize inputBox and outputBox
-        MoveWindow(inputBox, 0, 0, nInputBoxWidth, nHeight, TRUE);
-        MoveWindow(outputBox, nInputBoxWidth + nMiddleWidth, 0, nOutputBoxWidth,
-                   nHeight, TRUE);
-
-        // Move and resize buttons
-        MoveWindow(GetDlgItem(hWnd, ID_CLEANUP_BTN),
-                   nInputBoxWidth + nMiddleWidth / 2 - 50, nTopButtonY, 100,
-                   nButtonHeight, TRUE);
-        MoveWindow(GetDlgItem(hWnd, ID_BROWSE_BTN),
-                   nInputBoxWidth + nMiddleWidth / 2 - 50,
-                   nTopButtonY + nButtonHeight, 100, nButtonHeight, TRUE);
-
+        MoveWindow(inputBox, 0, nToolBarHeight, nInputBoxWidth,
+                   nHeight - nToolBarHeight, TRUE);
+        MoveWindow(outputBox, nInputBoxWidth + nMiddleWidth, nToolBarHeight,
+                   nOutputBoxWidth, nHeight - nToolBarHeight, TRUE);
     } break;
 
     case WM_DESTROY: {
