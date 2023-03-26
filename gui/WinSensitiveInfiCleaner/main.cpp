@@ -10,7 +10,8 @@
 #include <shellapi.h>
 #include <string>
 #include <thread>
-#include <commctrl.h> 
+#include <commctrl.h>
+#include <Commdlg.h>
 #include <windows.h>
 
 #define ID_CLEANUP_BTN 1
@@ -18,6 +19,7 @@
 #define ID_OUTPUT_BOX 3
 #define ID_BROWSE_BTN 4
 #define ID_TOOLBAR 5
+#define ID_FIND_BTN 6
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void RunSensitiveInfoCleaner();
@@ -54,12 +56,33 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args,
     return 0;
 }
 
+void ShowFindDialog(HWND hWnd)
+{
+    static FINDREPLACE fr;
+    static wchar_t szFindText[128] = L"";
+
+    ZeroMemory(&fr, sizeof(fr));
+    fr.lStructSize = sizeof(fr);
+    fr.hwndOwner = hWnd;
+    fr.lpstrFindWhat = szFindText;
+    fr.wFindWhatLen = 128;
+    fr.Flags = FR_DOWN;
+
+    FindTextW(&fr);
+}
+
 LRESULT CALLBACK EditBoxSubclassProc(HWND hWnd, UINT msg, WPARAM wParam,
                                      LPARAM lParam)
 {
     if (msg == WM_KEYDOWN && wParam == 'A' &&
         (GetKeyState(VK_CONTROL) & 0x8000)) {
         SendMessage(hWnd, EM_SETSEL, 0, -1);
+        return 0;
+    }
+
+    if (msg == WM_KEYDOWN && wParam == 'F' &&
+        (GetKeyState(VK_CONTROL) & 0x8000)) {
+        ShowFindDialog(GetParent(hWnd));
         return 0;
     }
     
@@ -94,7 +117,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         SendMessage(hToolBar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 
         // Create buttons for the toolbar
-        TBBUTTON tbButtons[2] = {{0,
+        TBBUTTON tbButtons[3] = {{0,
                                   ID_CLEANUP_BTN,
                                   TBSTATE_ENABLED,
                                   BTNS_AUTOSIZE,
@@ -107,7 +130,14 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
                                   BTNS_AUTOSIZE,
                                   {0},
                                   0,
-                                  (INT_PTR)L"Browse..."}};
+                                  (INT_PTR)L"Browse..."},
+                                 {2,
+                                  ID_FIND_BTN,
+                                  TBSTATE_ENABLED,
+                                  BTNS_AUTOSIZE,
+                                  {0},
+                                  0,
+                                  (INT_PTR)L"Find"}};
 
         // Add buttons to the toolbar
         SendMessage(hToolBar, TB_ADDBUTTONS,
@@ -161,6 +191,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
             ShellExecuteW(NULL, L"open", folderPath.c_str(), NULL, NULL,
                           SW_SHOW);
+        } else if (LOWORD(wp) == ID_FIND_BTN) {
+            ShowFindDialog(hWnd);
         }
     }
 
