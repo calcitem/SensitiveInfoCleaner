@@ -138,4 +138,33 @@ void RunSensitiveInfoCleaner()
     std::wstring outputContentW = utf8_conv.from_bytes(outputContentUtf8);
 
     SetWindowTextW(outputBox, outputContentW.c_str());
+
+    // Get the output content as a wide string
+    int outputLength = GetWindowTextLengthW(outputBox) + 1;
+    wchar_t *outputContentForClipboardW = new wchar_t[outputLength];
+    GetWindowTextW(outputBox, outputContentForClipboardW, outputLength);
+
+    // Open the clipboard
+    if (OpenClipboard(NULL)) {
+        // Empty the clipboard
+        EmptyClipboard();
+
+        // Allocate memory to hold the output content (including the null
+        // terminator)
+        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE,
+                                   outputLength * sizeof(wchar_t));
+        if (hMem) {
+            wchar_t *pMem = (wchar_t *)GlobalLock(hMem);
+            memcpy(pMem, outputContentForClipboardW,
+                   outputLength * sizeof(wchar_t));
+            GlobalUnlock(hMem);
+
+            // Set the clipboard data and close the clipboard
+            SetClipboardData(CF_UNICODETEXT, hMem);
+        }
+        CloseClipboard();
+    }
+
+    // Free memory
+    delete[] outputContentForClipboardW;
 }
