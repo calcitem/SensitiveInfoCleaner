@@ -15,7 +15,7 @@
 #define ID_CLEANUP_BTN 1
 #define ID_INPUT_BOX 2
 #define ID_OUTPUT_BOX 3
-#define ID_OPEN_EXE_FOLDER_BTN 4
+#define ID_BROWSE_BTN 4
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void RunSensitiveInfoCleaner();
@@ -73,7 +73,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
                       100, 25, hWnd, (HMENU)ID_CLEANUP_BTN, nullptr, nullptr);
 
         CreateWindowW(L"button", L"Browse...", WS_VISIBLE | WS_CHILD, 700, 500,
-                      100, 25, hWnd, (HMENU)ID_OPEN_EXE_FOLDER_BTN, nullptr,
+                      100, 25, hWnd, (HMENU)ID_BROWSE_BTN, nullptr,
                       nullptr);
 
         inputBox = CreateWindowW(
@@ -104,7 +104,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_COMMAND: {
         if (LOWORD(wp) == ID_CLEANUP_BTN) {
             RunSensitiveInfoCleaner();
-        } else if (LOWORD(wp) == ID_OPEN_EXE_FOLDER_BTN) {
+        } else if (LOWORD(wp) == ID_BROWSE_BTN) {
             WCHAR szExePath[MAX_PATH];
             GetModuleFileNameW(NULL, szExePath, MAX_PATH);
             std::wstring exePath(szExePath);
@@ -138,7 +138,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         MoveWindow(GetDlgItem(hWnd, ID_CLEANUP_BTN),
                    nInputBoxWidth + nMiddleWidth / 2 - 50, nTopButtonY, 100,
                    nButtonHeight, TRUE);
-        MoveWindow(GetDlgItem(hWnd, ID_OPEN_EXE_FOLDER_BTN),
+        MoveWindow(GetDlgItem(hWnd, ID_BROWSE_BTN),
                    nInputBoxWidth + nMiddleWidth / 2 - 50,
                    nTopButtonY + nButtonHeight, 100, nButtonHeight, TRUE);
 
