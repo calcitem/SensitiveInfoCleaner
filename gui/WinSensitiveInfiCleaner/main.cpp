@@ -7,6 +7,7 @@
 #include <codecvt>
 #include <fstream>
 #include <locale>
+#include <shellapi.h>
 #include <string>
 #include <thread>
 #include <windows.h>
@@ -14,6 +15,7 @@
 #define ID_CLEANUP_BTN 1
 #define ID_INPUT_BOX 2
 #define ID_OUTPUT_BOX 3
+#define ID_OPEN_EXE_FOLDER_BTN 4
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void RunSensitiveInfoCleaner();
@@ -53,6 +55,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         CreateWindowW(L"button", L"Cleanup", WS_VISIBLE | WS_CHILD, 500, 500,
                       100, 25, hWnd, (HMENU)ID_CLEANUP_BTN, nullptr, nullptr);
 
+        CreateWindowW(L"button", L"Browse...", WS_VISIBLE | WS_CHILD, 700, 500,
+                      100, 25, hWnd, (HMENU)ID_OPEN_EXE_FOLDER_BTN, nullptr,
+                      nullptr);
+
         inputBox = CreateWindowW(
             L"edit", L"",
             WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | WS_VSCROLL, 50,
@@ -77,8 +83,19 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_COMMAND: {
         if (LOWORD(wp) == ID_CLEANUP_BTN) {
             RunSensitiveInfoCleaner();
+        } else if (LOWORD(wp) == ID_OPEN_EXE_FOLDER_BTN) {
+            WCHAR szExePath[MAX_PATH];
+            GetModuleFileNameW(NULL, szExePath, MAX_PATH);
+            std::wstring exePath(szExePath);
+            std::wstring folderPath = exePath.substr(
+                0, exePath.find_last_of(L"\\/"));
+
+            ShellExecuteW(NULL, L"open", folderPath.c_str(), NULL, NULL,
+                          SW_SHOW);
         }
-    } break;
+    }
+
+    break;
 
     case WM_DESTROY: {
         PostQuitMessage(0);
