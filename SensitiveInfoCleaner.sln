@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SensitiveInfoCleaner", "SensitiveInfoCleaner.vcxproj", "{7245C6BB-0A1D-4758-B54F-22FE5C921E82}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinSensitiveInfiCleaner", "gui\WinSensitiveInfiCleaner\WinSensitiveInfiCleaner.vcxproj", "{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{7245C6BB-0A1D-4758-B54F-22FE5C921E82}.Release|x64.Build.0 = Release|x64
 		{7245C6BB-0A1D-4758-B54F-22FE5C921E82}.Release|x86.ActiveCfg = Release|Win32
 		{7245C6BB-0A1D-4758-B54F-22FE5C921E82}.Release|x86.Build.0 = Release|Win32
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Debug|x64.ActiveCfg = Debug|x64
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Debug|x64.Build.0 = Debug|x64
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Debug|x86.Build.0 = Debug|Win32
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Release|x64.ActiveCfg = Release|x64
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Release|x64.Build.0 = Release|x64
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Release|x86.ActiveCfg = Release|Win32
+		{1B1CDE74-59EE-44C1-BE65-29C5EDDF17B2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
